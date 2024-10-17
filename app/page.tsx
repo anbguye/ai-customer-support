@@ -5,6 +5,7 @@ import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Groq from "groq-sdk";
 
 interface Message {
   id: number
@@ -13,24 +14,64 @@ interface Message {
 }
 
 export default function Home() {
+  
+  const client = new Groq({
+    apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+    dangerouslyAllowBrowser: true,
+  });
 
   // Initialize state
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, text: 'Hello! How can I assist you today?', sender: 'bot' },
-  ])
+    { id: 1, text: "Hello! How can I assist you today?", sender: "bot" },
+  ]);
 
   // Initialize input state
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState("");
 
   // Handle user input
   const handleSend = () => {
     if (input.trim()) {
-      setMessages(prev => [...prev, { id: prev.length + 1, text: input, sender: 'user' }])
-      setInput('')
-      // Simulate bot response
+      setMessages((prev) => [
+        ...prev,
+        { id: prev.length + 1, text: input, sender: "user" },
+      ]);
+      setInput("");
       setTimeout(() => {
-        setMessages(prev => [...prev, { id: prev.length + 1, text: "Test message", sender: 'bot' }])
-      }, 1000)
+        main([
+          ...messages,
+          { id: messages.length + 1, text: input, sender: "user" },
+        ]);
+      }, 1000);
+    }
+  };
+
+  async function main(updatedMessages: Message[]) {
+    const chatHistory = updatedMessages.map((message: Message) => ({
+      content: message.text,
+      name: message.sender === "user" ? "user" : "assistant",
+    }));
+
+    const chatCompletion = await client.chat.completions.create({
+      model: "llama3-8b-8192",
+      messages: [
+        {
+          role: "system",
+          content: `You are a helpful assistant. Here is the chat history ${JSON.stringify(
+            chatHistory
+          )}`,
+        },
+      ],
+    });
+
+    if (chatCompletion.choices[0].message.content) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: prev.length + 1,
+          text: chatCompletion.choices[0].message.content || "",
+          sender: "bot",
+        },
+      ]);
     }
   }
 
