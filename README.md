@@ -2,6 +2,10 @@
 
 Welcome to the Customer Support AI project! This repository contains the code for a customer support chatbot built using React and Groq SDK. The chatbot is designed to assist users by providing automated responses to their queries.
 
+Find the website here!
+
+https://ai-customer-support-delta-cyan.vercel.app/
+
 ## Table of Contents
 
 - [Introduction](#introduction)
