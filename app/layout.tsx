@@ -15,7 +15,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Customer Support",
-  description: "Get help here!",
+  description: "An AI-powered customer support chatbot",
 };
 
 export default function RootLayout({
