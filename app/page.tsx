@@ -56,7 +56,7 @@ export default function Home() {
       messages: [
         {
           role: "system",
-          content: `You are a helpful assistant. Here is the chat history ${JSON.stringify(
+          content: `You are a helpful customer. Here is the chat history ${JSON.stringify(
             chatHistory
           )}`,
         },
