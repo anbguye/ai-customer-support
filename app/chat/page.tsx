@@ -1,11 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
-import { Send } from "lucide-react";
+import React, { useState, useEffect} from "react";
+import { useRouter } from "next/navigation";
+import { Send, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Groq from "groq-sdk";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 interface Message {
   id: number
@@ -27,6 +32,18 @@ export default function Home() {
 
   // Initialize input state
   const [input, setInput] = useState("");
+  const [feedbackComment, setFeedbackComment] = useState('')
+  const [feedbackRating, setFeedbackRating] = useState('')
+  const [feedbackMenu, setFeedbackMenu] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    console.log('isAuthenticated', localStorage.getItem('isAuthenticated'))
+    const isAuthenticated = localStorage.getItem('isAuthenticated')
+    if (!isAuthenticated) {
+      router.push('/login')
+    }
+  }, [router])
 
   // Handle user input
   const handleSend = () => {
@@ -75,6 +92,14 @@ export default function Home() {
     }
   }
 
+  const handleFeedbackSubmit = ((e: React.FormEvent) => {
+    e.preventDefault()
+    console.log('Feedback submitted', { rating: feedbackRating, comment: feedbackComment })
+    setFeedbackComment('')
+    setFeedbackRating('')
+    setFeedbackMenu(false)
+  })
+
   return (
     // Main container div
     // flex flex-col: Creates a flexbox container with vertical layout
@@ -85,17 +110,71 @@ export default function Home() {
     // text-gray-800: Sets the text color to dark gray
     // p-4: Adds padding of 1rem (16px) on all sides
     // shadow-lg: Adds a large box shadow for depth
-    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-gradient-to-b from-gray-50 to-white text-gray-50 p-4 shadow-lg">
+    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-gradient-to-b from-gray-50 to-white text-gray-800 p-4 shadow-lg">
       {/* Header section */}
       {/* mb-4: Adds margin to the bottom */}
       {/* pb-2: Adds padding to the bottom */}
       {/* border-b border-gray-200: Adds a light gray border at the bottom */}
-      <header className=" mb-4 pb-2 border-b border-gray-200">
+      <header className=" mb-4 pb-2 border-b border-gray-200 flex justify-between items-center">
         {/* h1 for the main title */}
         {/* text-xl: Sets font size to extra large */}
         {/* font-semibold: Sets font weight to semi-bold */}
         {/* text-gray-700: Sets text color to a darker gray */}
         <h1 className="text-x1 font-semibold text-gray-700">AI Support</h1>
+        <Dialog open={feedbackMenu} onOpenChange={setFeedbackMenu}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Feedback
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Provide Feedback</DialogTitle>
+              <DialogDescription>
+                We appreciate your feedback to improve our service.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleFeedbackSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label>How would you rate your experience?</Label>
+                <RadioGroup
+                  value={feedbackRating}
+                  onValueChange={setFeedbackRating}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="poor" id="poor" />
+                    <Label htmlFor="poor">Poor</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="average" id="average" />
+                    <Label htmlFor="average">Average</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="good" id="good" />
+                    <Label htmlFor="good">Good</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="excellent" id="excellent" />
+                    <Label htmlFor="excellent">Excellent</Label>
+                  </div>
+                </RadioGroup>
+                <div className='space-y-2'>
+                  <Label htmlFor='comment'>Additional Comments</Label>
+                  <Textarea
+                    id='comment'
+                    value={feedbackComment}
+                    onChange={(e) => setFeedbackComment(e.target.value)}
+                    placeholder='Please provide any additional feedback here...'
+                  />
+                </div>
+              </div>
+              <Button type='submit'>
+                Submit Feedback
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </header>
       {/* ScrollArea component for the chat messages */}
       {/* flex-grow: Allows this component to grow and fill available space */}
