@@ -14,7 +14,7 @@ export default function Page() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     //actual implementation would involve  a call to an authentication service
-    localStorage.setitem('isAuthenticated', 'true');
+    localStorage.setItem('isAuthenticated', 'true');
     console.log(`Logging in with ${username} and ${password}`);
     router.push("/chat");
   };
